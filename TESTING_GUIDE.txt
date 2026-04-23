@@ -1,0 +1,49 @@
+# Testing Guide
+
+This guide explains how to run the automated tests for the Marketplace project.
+
+## 1. Backend Tests (Python/FastAPI)
+
+The backend tests are located in the `tests/` directory and use `pytest`. They use an in-memory SQLite database to ensure tests are fast and don't affect your development data.
+
+### How to Run:
+1. Ensure your virtual environment is active.
+2. Run the following command from the project root:
+   ```bash
+   pytest tests/
+   ```
+   *Note: If you have issues with module imports, try: `python -m pytest tests/`*
+
+### What's Tested:
+- **Users**: Registration and profile retrieval.
+- **Auth**: Login and JWT token generation.
+- **Listings**: Full CRUD (Create, Read, Update, Delete) operations.
+- **Chat**: Conversation lists, history, and real-time WebSocket communication.
+
+---
+
+## 2. Frontend Tests (React/Vitest)
+
+The frontend tests are located alongside the components (e.g., `src/components/ListingCard.test.tsx`) and use `vitest` with `React Testing Library`.
+
+### How to Run:
+1. Navigate to the frontend directory:
+   ```bash
+   cd marketplace-frontend
+   ```
+2. Run the test script:
+   ```bash
+   npm run test
+   ```
+   *Note: Use `npm run test -- --watch` to keep tests running while you edit code.*
+
+### What's Tested:
+- **Components**: Rendering logic, property handling, and UI states.
+- **Contexts**: Authentication state and storage management.
+
+---
+
+## 3. General Tips
+- **CI/CD Ready**: These tests are designed to run in a headless environment.
+- **Isolation**: Each test case is isolated and resets the state to ensure reliability.
+- **Mocking**: External APIs (like Unsplash for images) and browser features (like LocalStorage) are mocked to prevent network dependency.

@@ -73,7 +73,7 @@ const ListingDetailPage: React.FC = () => {
 
   const images = listing.images.length > 0 
     ? listing.images.map((img: any) => `http://localhost:8000/static/images/${img.filename}`)
-    : ['https://via.placeholder.com/800x600?text=No+Image+Available'];
+    : ['https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2070&auto=format&fit=crop'];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -191,11 +191,6 @@ const ListingDetailPage: React.FC = () => {
                   This is your listing
                 </div>
               )}
-              
-              <button className="w-full bg-white border-2 border-slate-100 text-slate-900 flex items-center justify-center py-5 rounded-2xl font-black text-lg hover:bg-slate-50 transition-all active:scale-[0.98]">
-                <ExternalLink className="w-5 h-5 mr-3 text-slate-400" />
-                Safety Tips
-              </button>
             </div>
 
             {/* Seller Profile Card Integration */}
@@ -233,7 +228,10 @@ const ListingDetailPage: React.FC = () => {
                     Edit
                   </Link>
                   <div className="bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-black text-sm flex items-center justify-center transition-all active:scale-95 cursor-pointer">
-                    <DeleteListingButton listingId={listing.id} />
+                    <DeleteListingButton 
+                      listingId={listing.id} 
+                      onSuccess={() => navigate('/')} 
+                    />
                   </div>
                 </div>
               </div>

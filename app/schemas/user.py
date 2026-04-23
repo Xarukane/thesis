@@ -14,9 +14,11 @@ class UserCreate(UserBase):
 
 
 # What we send back to the frontend (notice we NEVER send the password back)
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     id: int
+    username: str
     is_admin: bool
+    profile_image: str | None = None
     created_at: datetime
 
     class Config:

@@ -1,6 +1,9 @@
+import os
+import shutil
+import uuid
 from typing import List
 from app.api.deps import get_current_user
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.user import User
@@ -10,6 +13,9 @@ from app.schemas.listing import ListingResponse
 from app.core.security import get_password_hash
 
 router = APIRouter()
+
+UPLOAD_DIR = "uploads/images"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.post(
@@ -51,6 +57,31 @@ def read_user_profile(current_user: User = Depends(get_current_user)):
     Fetch the currently logged-in user's profile.
     This route is strictly protected by the get_current_user dependency.
     """
+    return current_user
+
+
+@router.post("/me/image", response_model=UserResponse)
+def upload_profile_image(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload a profile picture for the currently logged-in user."""
+    # 1. Generate a unique filename
+    file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
+    unique_filename = f"profile_{uuid.uuid4()}.{file_extension}"
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+    # 2. Save the file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # 3. Update the user record
+    current_user.profile_image = unique_filename
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+
     return current_user
 
 

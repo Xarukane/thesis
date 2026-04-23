@@ -94,6 +94,37 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
         print(f"WS error: {e}")
         manager.disconnect(websocket, user.id)
 
+@router.get("/conversations")
+def get_conversations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieve list of unique users current user has chatted with."""
+    # This is a bit simplified, but gets the job done:
+    # Find all messages where current_user is sender or receiver
+    messages = db.query(Message).filter(
+        or_(Message.sender_id == current_user.id, Message.receiver_id == current_user.id)
+    ).order_by(Message.created_at.desc()).all()
+    
+    conversations = []
+    seen_users = set()
+    
+    for msg in messages:
+        other_user_id = msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
+        if other_user_id not in seen_users:
+            seen_users.add(other_user_id)
+            other_user = db.query(User).filter(User.id == other_user_id).first()
+            if other_user:
+                conversations.append({
+                    "other_user_id": other_user.id,
+                    "other_username": other_user.username,
+                    "last_message": msg.content,
+                    "created_at": msg.created_at,
+                    "listing_id": msg.listing_id
+                })
+                
+    return conversations
+
 @router.get("/history/{other_user_id}", response_model=List[MessageResponse])
 def get_chat_history(
     other_user_id: int, 

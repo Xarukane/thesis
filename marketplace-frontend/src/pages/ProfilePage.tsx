@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
-import { User as UserIcon, Mail, Calendar, Package, ShieldCheck, Settings, ExternalLink } from 'lucide-react';
+import { User as UserIcon, Calendar, Package, ShieldCheck, Settings, ExternalLink, Camera, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = !id || parseInt(id) === currentUser?.id;
   const userId = isOwnProfile ? currentUser?.id : parseInt(id);
@@ -24,6 +27,30 @@ const ProfilePage: React.FC = () => {
     },
     enabled: !!userId,
   });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await api.post('/users/me/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      toast.success('Profile picture updated!');
+    },
+    onError: () => {
+      toast.error('Failed to upload image');
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      uploadMutation.mutate(e.target.files[0]);
+    }
+  };
 
   const { data: listings, isLoading: listingsLoading } = useQuery({
     queryKey: ['user-listings', userId],
@@ -57,6 +84,10 @@ const ProfilePage: React.FC = () => {
     </div>
   );
 
+  const userImageUrl = (user && user.profile_image) 
+    ? `http://localhost:8000/static/images/${user.profile_image}` 
+    : null;
+
   return (
     <div className="max-w-7xl mx-auto space-y-12">
       {/* Header Profile Section */}
@@ -71,14 +102,36 @@ const ProfilePage: React.FC = () => {
             <motion.div 
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="w-32 h-32 md:w-44 md:h-44 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center text-indigo-600 border-[6px] border-white relative z-10"
+              className="w-32 h-32 md:w-44 md:h-44 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center text-indigo-600 border-[6px] border-white relative z-10 group overflow-hidden"
             >
-              <UserIcon className="w-16 h-16 md:w-24 md:h-24" />
+              {userImageUrl ? (
+                <img src={userImageUrl} alt={user.username} className="w-full h-full object-cover rounded-[2.1rem]" />
+              ) : (
+                <UserIcon className="w-16 h-16 md:w-24 md:h-24" />
+              )}
+              
               {isOwnProfile && (
-                <div className="absolute bottom-2 right-2 bg-indigo-600 p-2 rounded-xl text-white shadow-lg cursor-pointer hover:bg-indigo-700 transition-colors">
-                  <Settings className="w-4 h-4" />
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-[2px]"
+                >
+                  {uploadMutation.isPending ? (
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="w-8 h-8 mb-1" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Update Photo</span>
+                    </>
+                  )}
                 </div>
               )}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*"
+              />
             </motion.div>
             
             <div className="mt-6 md:mt-0 flex-grow pb-2">
@@ -96,10 +149,6 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div className="flex flex-wrap gap-6 mt-4 text-slate-500 font-bold text-sm uppercase tracking-wider">
-                <div className="flex items-center">
-                  <Mail className="w-4 h-4 mr-2 text-indigo-400" />
-                  {user.email}
-                </div>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2 text-indigo-400" />
                   Joined {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -129,16 +178,16 @@ const ProfilePage: React.FC = () => {
           <p className="text-3xl font-black text-indigo-600">{listings?.length || 0}</p>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-1">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Total Deals</p>
-          <p className="text-3xl font-black text-slate-900">12</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Account Type</p>
+          <p className="text-3xl font-black text-slate-900">{user.is_admin ? 'Staff' : 'Standard'}</p>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-1">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Response Rate</p>
-          <p className="text-3xl font-black text-slate-900">98%</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Profile Status</p>
+          <p className="text-3xl font-black text-green-500">Active</p>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-1">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Member Level</p>
-          <p className="text-3xl font-black text-indigo-600 uppercase tracking-tighter">Pro</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Member Since</p>
+          <p className="text-3xl font-black text-indigo-600 uppercase tracking-tighter">{new Date(user.created_at).getFullYear()}</p>
         </div>
       </div>
 

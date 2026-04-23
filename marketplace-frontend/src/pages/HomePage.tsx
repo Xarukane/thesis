@@ -48,40 +48,31 @@ const HomePage: React.FC = () => {
   return (
     <div className="space-y-10">
       {/* Hero Section */}
-      <section className="relative bg-indigo-900 rounded-[2rem] overflow-hidden py-16 px-8 text-center text-white shadow-2xl">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+      <section className="relative bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-[2.5rem] overflow-hidden py-24 px-8 text-center text-white shadow-2xl">
+        <div className="absolute inset-0 opacity-30 pointer-events-none">
+          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-600 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-500 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 animate-pulse delay-1000"></div>
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/carbon-fibre.png")' }}></div>
         </div>
         
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 max-w-3xl mx-auto"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center space-x-2 bg-indigo-800/50 backdrop-blur-sm border border-indigo-700/50 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-            <span>Discover local treasures</span>
+          <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-xl border border-white/20 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-8 shadow-2xl">
+            <Sparkles className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">Modern Marketplace Protocol</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight leading-tight">
-            Find everything you need, <br />
-            <span className="text-indigo-400">right in your city.</span>
+          <h1 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter leading-[1.05]">
+            Discover quality goods, <br />
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent animate-gradient-x">traded locally.</span>
           </h1>
-          <p className="text-lg text-indigo-100/80 mb-10 font-medium max-w-xl mx-auto leading-relaxed">
-            Join thousands of users buying and selling unique items every day. 
-            The most trusted community marketplace.
+          <p className="text-xl text-indigo-100/70 mb-12 font-medium max-w-2xl mx-auto leading-relaxed">
+            The most secure way to buy and sell unique items in your city. 
+            Trusted by over <span className="text-white font-bold">12,000+</span> community members.
           </p>
-          
-          <div className="flex flex-wrap justify-center gap-4">
-            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10">
-              <TrendingUp className="w-4 h-4 text-indigo-400" />
-              <span>Trending Now</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10">
-              <Zap className="w-4 h-4 text-yellow-400" />
-              <span>Fast Selling</span>
-            </div>
-          </div>
         </motion.div>
       </section>
 

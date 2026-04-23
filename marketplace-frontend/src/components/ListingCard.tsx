@@ -31,7 +31,7 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
   const navigate = useNavigate();
   const imageUrl = listing.images.length > 0 
     ? `http://localhost:8000/static/images/${listing.images[0].filename}`
-    : 'https://via.placeholder.com/400x300?text=No+Image';
+    : 'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2070&auto=format&fit=crop';
 
   const isOwner = user?.id === listing.owner.id;
   const isAdmin = user?.is_admin;
@@ -47,35 +47,35 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ y: -10, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       onClick={handleCardClick}
-      className="bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all duration-500 border border-slate-200/60 flex flex-col h-full relative group cursor-pointer overflow-hidden"
+      className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.15)] transition-all duration-500 border border-slate-200/50 flex flex-col h-full relative group cursor-pointer overflow-hidden"
     >
-      <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+      <div className="relative h-64 w-full overflow-hidden bg-slate-50">
         <motion.img 
           src={imageUrl} 
           alt={listing.title} 
           className="w-full h-full object-cover"
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.6 }}
+          whileHover={{ scale: 1.15 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         />
         
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
           {isOwner && (
-            <div className="bg-indigo-600 text-white px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Your Ad
+            <div className="bg-indigo-600 text-white px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-[0.15em] shadow-xl flex items-center backdrop-blur-md">
+              <Sparkles className="w-3 h-3 mr-1.5 fill-current" />
+              Owner
             </div>
           )}
-          <div className="bg-white/90 backdrop-blur-md text-slate-900 px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-widest shadow-sm flex items-center">
-            <Tag className="w-3 h-3 mr-1 text-indigo-600" />
+          <div className="bg-white/90 backdrop-blur-xl text-slate-900 px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-[0.15em] shadow-sm flex items-center border border-white/50">
+            <Tag className="w-3 h-3 mr-1.5 text-indigo-600" />
             {listing.category}
           </div>
         </div>
 
-        <div className="absolute bottom-3 right-3 bg-indigo-600 text-white px-4 py-1.5 rounded-2xl font-black text-sm shadow-xl shadow-indigo-200">
+        <div className="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur-xl text-white px-5 py-2 rounded-2xl font-black text-base shadow-2xl border border-white/10 group-hover:bg-indigo-600 group-hover:scale-110 transition-all duration-300">
           ${listing.price.toLocaleString()}
         </div>
         

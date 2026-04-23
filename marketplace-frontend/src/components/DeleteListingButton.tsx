@@ -7,9 +7,10 @@ import toast from 'react-hot-toast';
 
 interface DeleteListingButtonProps {
   listingId: number;
+  onSuccess?: () => void;
 }
 
-const DeleteListingButton: React.FC<DeleteListingButtonProps> = ({ listingId }) => {
+const DeleteListingButton: React.FC<DeleteListingButtonProps> = ({ listingId, onSuccess }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const queryClient = useQueryClient();
 
@@ -18,8 +19,17 @@ const DeleteListingButton: React.FC<DeleteListingButtonProps> = ({ listingId }) 
       await api.delete(`/listings/${listingId}`);
     },
     onSuccess: () => {
+      // Invalidate all listing-related queries to ensure UI is fresh everywhere
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      queryClient.invalidateQueries({ queryKey: ['user-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listing', listingId] });
+      
       toast.success('Listing permanently removed');
+      setShowConfirm(false);
+      
+      if (onSuccess) {
+        onSuccess();
+      }
     },
     onError: () => {
       toast.error('Failed to delete listing');

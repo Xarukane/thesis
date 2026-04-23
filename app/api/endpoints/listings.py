@@ -152,6 +152,39 @@ def update_listing(
     return listing
 
 
+@router.delete("/{listing_id}/images/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_listing_image(
+    listing_id: int,
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a specific image from a listing. Must be the owner or admin."""
+    # 1. Check if listing exists
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+    
+    # 2. Check authorization
+    if listing.owner_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # 3. Check if image exists and belongs to this listing
+    image = db.query(Image).filter(Image.id == image_id, Image.listing_id == listing_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+
+    # 4. Delete the physical file (Optional but recommended)
+    file_path = os.path.join(UPLOAD_DIR, image.filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # 5. Delete from DB
+    db.delete(image)
+    db.commit()
+    return None
+
+
 @router.delete("/{listing_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_listing(
     listing_id: int,
@@ -172,6 +205,12 @@ def delete_listing(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this listing",
         )
+
+    # Also delete associated images from disk
+    for image in listing.images:
+        file_path = os.path.join(UPLOAD_DIR, image.filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
     db.delete(listing)
     db.commit()
