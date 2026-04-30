@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
-import { User as UserIcon, Calendar, Package, ShieldCheck, Settings, ExternalLink, Camera, Loader2 } from 'lucide-react';
+import { User as UserIcon, Calendar, Package, ShieldCheck, ExternalLink, Camera, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -90,7 +90,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
-      {/* Header Profile Section */}
+      {}
       <section className="card !rounded-[2.5rem] !shadow-2xl !shadow-indigo-50 border-none relative overflow-hidden">
         <div className="h-40 bg-indigo-600 relative overflow-hidden">
           <div className="absolute inset-0 opacity-20">
@@ -171,7 +171,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Stats Counter */}
+      {}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-1">
           <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Live Listings</p>
@@ -191,7 +191,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* User Listings Section */}
+      {}
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">

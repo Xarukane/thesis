@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { Send, User as UserIcon, MessageCircle, ArrowLeft, MoreVertical, Search, Zap, Clock } from 'lucide-react';
@@ -25,45 +25,44 @@ interface Conversation {
 
 const ChatPage: React.FC = () => {
   const { user, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [activeReceiverId, setActiveReceiverId] = useState<number | null>(location.state?.receiverId || null);
   const [activeListingId, setActiveListingId] = useState<number | null>(location.state?.listingId || null);
-  const [activeUsername, setActiveUsername] = useState<string>(location.state?.receiverUsername || 'Seller');
+  const [activeUsername, setActiveUsername] = useState<string>(location.state?.receiverUsername || 'User');
   
   const socketRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const activeReceiverIdRef = useRef<number | null>(activeReceiverId);
+  const activeListingIdRef = useRef<number | null>(activeListingId);
 
-  // Keep the ref in sync with state
   useEffect(() => {
     activeReceiverIdRef.current = activeReceiverId;
-  }, [activeReceiverId]);
+    activeListingIdRef.current = activeListingId;
+  }, [activeReceiverId, activeListingId]);
 
-  // 1. Fetch Conversations List
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       const response = await api.get('/chat/conversations');
       setConversations(response.data);
       
-      // If we have an active receiver from state, update their name if found in conversations
       if (activeReceiverId) {
-        const activeConv = response.data.find((c: Conversation) => c.other_user_id === activeReceiverId);
+        const activeConv = response.data.find((c: Conversation) => 
+          c.other_user_id === activeReceiverId && c.listing_id === activeListingId
+        );
         if (activeConv) setActiveUsername(activeConv.other_username);
       }
     } catch (err) {
       console.error('Failed to fetch conversations', err);
     }
-  };
+  }, [activeReceiverId, activeListingId]);
 
   useEffect(() => {
     if (user) fetchConversations();
-  }, [user]);
+  }, [user, fetchConversations]);
 
-  // 2. WebSocket Connection - Stable (Only depends on user login)
   useEffect(() => {
     if (authLoading || !user) return;
 
@@ -80,11 +79,12 @@ const ChatPage: React.FC = () => {
     socket.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       
-      // Use Ref to check if message belongs to CURRENTLY active chat
       const currentActiveId = activeReceiverIdRef.current;
+      const currentListingId = activeListingIdRef.current;
+      
       if (
-        (msg.sender_id === currentActiveId && msg.receiver_id === user.id) ||
-        (msg.sender_id === user.id && msg.receiver_id === currentActiveId)
+        (msg.sender_id === currentActiveId || msg.receiver_id === currentActiveId) &&
+        (msg.listing_id === (currentListingId || null) || (!msg.listing_id && !currentListingId))
       ) {
         setMessages((prev) => [...prev, msg]);
       }
@@ -93,7 +93,6 @@ const ChatPage: React.FC = () => {
     };
 
     socket.onerror = () => {
-      // Only toast if we're not in the middle of a deliberate close/reconnect
       if (socket.readyState === WebSocket.CONNECTING) {
         toast.error('Chat connection error');
       }
@@ -104,30 +103,30 @@ const ChatPage: React.FC = () => {
     return () => {
       socket.close();
     };
-  }, [user, authLoading]); // Removed activeReceiverId from dependencies
+  }, [user, authLoading, fetchConversations]);
 
-  // 3. Fetch History when active chat changes
-  useEffect(() => {
-    if (activeReceiverId && user) {
-      fetchHistory();
-    }
-  }, [activeReceiverId, user]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
+    if (!activeReceiverId) return;
     try {
-      // If we have a specific listing context, use it, otherwise just user-to-user
-      const url = `/chat/history/${activeReceiverId}${activeListingId ? `?listing_id=${activeListingId}` : ''}`;
+      const lid = activeListingId !== null ? activeListingId : 0;
+      const url = `/chat/history/${activeReceiverId}?listing_id=${lid}`;
       const response = await api.get(url);
       setMessages(response.data);
     } catch (err) {
       console.error('Failed to fetch history', err);
       toast.error('Could not load chat history');
     }
-  };
+  }, [activeReceiverId, activeListingId]);
+
+  useEffect(() => {
+    if (activeReceiverId && user) {
+      fetchHistory();
+    }
+  }, [activeReceiverId, user, fetchHistory]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,10 +148,12 @@ const ChatPage: React.FC = () => {
   };
 
   const handleSelectConversation = (conv: Conversation) => {
+    if (activeReceiverId === conv.other_user_id && activeListingId === conv.listing_id) return;
+    
     setActiveReceiverId(conv.other_user_id);
     setActiveListingId(conv.listing_id);
     setActiveUsername(conv.other_username);
-    setMessages([]); // Clear while loading
+    setMessages([]); 
   };
 
   if (authLoading) return (
@@ -184,7 +185,6 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] min-h-[600px] flex gap-6">
-      {/* Sidebar: Conversations List */}
       <aside className={`w-full md:w-80 flex-shrink-0 flex flex-col gap-4 ${activeReceiverId ? 'hidden md:flex' : 'flex'}`}>
         <div className="bg-white rounded-[2.5rem] shadow-xl shadow-indigo-100/20 border border-slate-200/60 overflow-hidden flex flex-col h-full">
           <div className="p-6 border-b border-slate-100 bg-slate-50/50">
@@ -208,20 +208,20 @@ const ChatPage: React.FC = () => {
                   key={`${conv.other_user_id}-${conv.listing_id}`}
                   onClick={() => handleSelectConversation(conv)}
                   className={`w-full p-4 rounded-2xl flex items-center space-x-3 transition-all ${
-                    activeReceiverId === conv.other_user_id 
+                    activeReceiverId === conv.other_user_id && activeListingId === conv.listing_id
                       ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-[1.02]' 
                       : 'hover:bg-slate-50 text-slate-600'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    activeReceiverId === conv.other_user_id ? 'bg-white/20' : 'bg-indigo-50 text-indigo-600'
+                    activeReceiverId === conv.other_user_id && activeListingId === conv.listing_id ? 'bg-white/20' : 'bg-indigo-50 text-indigo-600'
                   }`}>
                     <UserIcon className="w-6 h-6" />
                   </div>
                   <div className="text-left overflow-hidden">
                     <div className="font-black text-sm truncate">{conv.other_username}</div>
                     <div className={`text-xs truncate font-medium opacity-70 ${
-                      activeReceiverId === conv.other_user_id ? 'text-white' : 'text-slate-500'
+                      activeReceiverId === conv.other_user_id && activeListingId === conv.listing_id ? 'text-white' : 'text-slate-500'
                     }`}>
                       {conv.last_message}
                     </div>
@@ -233,7 +233,6 @@ const ChatPage: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main Chat Area */}
       <main className={`flex-grow bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100/30 border border-slate-200/60 overflow-hidden flex flex-col ${!activeReceiverId ? 'hidden md:flex' : 'flex'}`}>
         {!activeReceiverId ? (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-6 p-10">
@@ -247,7 +246,6 @@ const ChatPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Chat Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
               <div className="flex items-center space-x-4">
                 <button 
@@ -286,7 +284,6 @@ const ChatPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Messages Scroll Area */}
             <div className="flex-grow p-6 md:p-8 overflow-y-auto bg-slate-50/50 space-y-6">
               <AnimatePresence initial={false}>
                 {messages.length === 0 ? (
@@ -325,7 +322,6 @@ const ChatPage: React.FC = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Form */}
             <div className="p-6 bg-white border-t border-slate-100">
               <form onSubmit={sendMessage} className="flex items-center space-x-3 max-w-4xl mx-auto">
                 <div className="flex-grow relative group">

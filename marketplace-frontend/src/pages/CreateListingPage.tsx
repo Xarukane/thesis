@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Upload, X, CheckCircle } from 'lucide-react';
+import { Upload, X, CheckCircle, Camera, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CreateListingPage: React.FC = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -14,7 +15,7 @@ const CreateListingPage: React.FC = () => {
     category: 'General',
     location: '',
   });
-  const [image, setImage] = useState<File | null>(null);
+  const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -30,9 +31,14 @@ const CreateListingPage: React.FC = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setImages(prev => [...prev, ...newFiles]);
     }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +47,7 @@ const CreateListingPage: React.FC = () => {
     setError('');
 
     try {
-      // 1. Create the listing
+      
       const listingResponse = await api.post('/listings/', {
         ...formData,
         price: parseFloat(formData.price),
@@ -49,15 +55,17 @@ const CreateListingPage: React.FC = () => {
 
       const listingId = listingResponse.data.id;
 
-      // 2. Upload the image if selected
-      if (image) {
-        const imageFormData = new FormData();
-        imageFormData.append('file', image);
-        await api.post(`/listings/${listingId}/images`, imageFormData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+      
+      if (images.length > 0) {
+        await Promise.all(images.map(async (img) => {
+          const imageFormData = new FormData();
+          imageFormData.append('file', img);
+          return api.post(`/listings/${listingId}/images`, imageFormData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+        }));
       }
 
       setSuccess(true);
@@ -79,125 +87,170 @@ const CreateListingPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-100">
-      <h2 className="text-3xl font-bold mb-8 text-gray-800">Create New Listing</h2>
-      
-      {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6 text-sm font-medium flex items-center">
-          <X className="w-5 h-5 mr-2" />
-          {error}
-        </div>
-      )}
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create New Listing</h1>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Item Title</label>
-          <input
-            name="title"
-            type="text"
-            required
-            placeholder="e.g. iPhone 15 Pro, 256GB"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all placeholder-gray-400 text-gray-900"
-            value={formData.title}
-            onChange={handleChange}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-indigo-100/20 border border-slate-200/60 space-y-8">
+            {error && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold flex items-center border border-red-100">
+                <X className="w-5 h-5 mr-2" />
+                {error}
+              </div>
+            )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Price ($)</label>
-            <input
-              name="price"
-              type="number"
-              required
-              placeholder="0.00"
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all placeholder-gray-400 text-gray-900"
-              value={formData.price}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Category</label>
-            <select
-              name="category"
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-gray-900"
-              value={formData.category}
-              onChange={handleChange}
-            >
-              <option value="General">General</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Furniture">Furniture</option>
-              <option value="Vehicles">Vehicles</option>
-              <option value="Real Estate">Real Estate</option>
-              <option value="Clothing">Clothing</option>
-            </select>
-          </div>
-        </div>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Item Title</label>
+                <input
+                  name="title"
+                  type="text"
+                  required
+                  placeholder="What are you selling?"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-semibold"
+                  value={formData.title}
+                  onChange={handleChange}
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Location</label>
-          <input
-            name="location"
-            type="text"
-            required
-            placeholder="e.g. New York, NY"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all placeholder-gray-400 text-gray-900"
-            value={formData.location}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
-          <textarea
-            name="description"
-            required
-            rows={4}
-            placeholder="Describe your item in detail..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none placeholder-gray-400 text-gray-900"
-            value={formData.description}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Product Image</label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-indigo-400 transition-colors cursor-pointer relative">
-            <div className="space-y-1 text-center">
-              {image ? (
-                <div className="text-indigo-600 font-medium">
-                  Selected: {image.name}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Price ($)</label>
+                  <input
+                    name="price"
+                    type="number"
+                    required
+                    placeholder="0.00"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-semibold"
+                    value={formData.price}
+                    onChange={handleChange}
+                  />
                 </div>
-              ) : (
-                <>
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
-                      <span>Upload a file</span>
-                      <input type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                </>
-              )}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                  <select
+                    name="category"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none text-slate-900 font-bold appearance-none cursor-pointer"
+                    value={formData.category}
+                    onChange={handleChange}
+                  >
+                    <option value="General">General</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Vehicles">Vehicles</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Clothing">Clothing</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Location</label>
+                <input
+                  name="location"
+                  type="text"
+                  required
+                  placeholder="e.g. New York, NY"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-semibold"
+                  value={formData.location}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
+                <textarea
+                  name="description"
+                  required
+                  rows={6}
+                  placeholder="Tell buyers more about your item..."
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none resize-none placeholder-slate-400 text-slate-900 font-medium"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
-            <input 
-              type="file" 
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-              onChange={handleImageChange} 
-              accept="image/*"
-            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-indigo-600 text-white py-5 rounded-[1.5rem] font-black text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center"
+            >
+              {loading ? 'Publishing...' : 'Publish Listing'}
+            </button>
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 text-white py-4 px-4 rounded-md font-bold text-lg hover:bg-indigo-700 transition duration-200 shadow-lg hover:shadow-indigo-200 disabled:opacity-50"
-        >
-          {loading ? 'Publishing...' : 'Publish Listing'}
-        </button>
+        {}
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-indigo-100/20 border border-slate-200/60 flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center">
+                <Camera className="w-4 h-4 mr-2 text-indigo-600" />
+                Product Media
+              </h3>
+              <label className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors cursor-pointer">
+                <Upload className="w-5 h-5" />
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  onChange={handleImageChange} 
+                  multiple 
+                  accept="image/*" 
+                />
+              </label>
+            </div>
+
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+              <AnimatePresence>
+                {images.length === 0 ? (
+                  <div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-3xl">
+                    <Upload className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">No photos added</p>
+                  </div>
+                ) : (
+                  images.map((img, index) => (
+                    <motion.div 
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="relative group rounded-2xl overflow-hidden aspect-video bg-slate-50 border border-slate-100 shadow-sm"
+                    >
+                      <img 
+                        src={URL.createObjectURL(img)} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="bg-red-500 text-white p-3 rounded-2xl hover:bg-red-600 shadow-xl transition-all active:scale-90"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <p className="text-[10px] text-white bg-black/50 px-2 py-1 rounded backdrop-blur-md truncate">
+                          {img.name}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="mt-6 p-4 bg-indigo-50 rounded-2xl text-[10px] font-bold text-indigo-600 uppercase tracking-[0.1em] leading-relaxed">
+              💡 Tip: Listings with multiple clear photos sell up to 3x faster!
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   );

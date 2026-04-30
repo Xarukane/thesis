@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Save, X, CheckCircle, ArrowLeft, Trash2, Camera, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Save, CheckCircle, ArrowLeft, Trash2, Camera, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,7 +24,7 @@ const EditListingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Fetch existing listing data
+  
   const { data: listing, isLoading: fetchingListing } = useQuery({
     queryKey: ['listing', id],
     queryFn: async () => {
@@ -43,16 +43,18 @@ const EditListingPage: React.FC = () => {
         category: listing.category,
         location: listing.location,
       });
+    }
+  }, [listing]);
 
-      // Authorization check
-      if (user && !user.is_admin && listing.owner.id !== user.id) {
-        toast.error('Not authorized to edit this listing');
-        navigate('/');
-      }
+  useEffect(() => {
+    
+    if (listing && user && !user.is_admin && listing.owner.id !== user.id) {
+      toast.error('Not authorized to edit this listing');
+      navigate('/');
     }
   }, [listing, user, navigate]);
 
-  // Image Upload Mutation
+  
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -68,7 +70,7 @@ const EditListingPage: React.FC = () => {
     onError: () => toast.error('Failed to upload image'),
   });
 
-  // Image Delete Mutation
+  
   const deleteImageMutation = useMutation({
     mutationFn: async (imageId: number) => {
       await api.delete(`/listings/${id}/images/${imageId}`);
@@ -148,7 +150,7 @@ const EditListingPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Form */}
+        {}
         <div className="lg:col-span-2 order-2 lg:order-1">
           <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-indigo-100/20 border border-slate-200/60 space-y-8">
             <div className="space-y-6">
@@ -238,7 +240,7 @@ const EditListingPage: React.FC = () => {
           </form>
         </div>
 
-        {/* Right: Image Management */}
+        {}
         <div className="lg:col-span-1 order-1 lg:order-2 space-y-6">
           <div className="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-indigo-100/20 border border-slate-200/60 flex flex-col h-full">
             <div className="flex items-center justify-between mb-6">

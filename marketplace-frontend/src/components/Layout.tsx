@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, LogOut, User as UserIcon, MessageCircle, PlusCircle, Menu, X } from 'lucide-react';
+import { ShoppingCart, LogOut, User as UserIcon, MessageCircle, PlusCircle, Menu, X, ShieldCheck } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -38,7 +38,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
+            {}
             <div className="hidden md:flex items-center space-x-1">
               <Link to="/" className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive('/') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
                 Browse
@@ -54,6 +54,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     Chats
                   </Link>
                   <div className="h-6 w-px bg-slate-200 mx-2" />
+                  {user.is_admin && (
+                    <Link to="/admin" className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center ${isActive('/admin') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
+                      <ShieldCheck className="w-4 h-4 mr-1.5 text-slate-400" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
                   <Link to="/profile" className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center ${isActive('/profile') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
                     <UserIcon className="w-4 h-4 mr-1.5 text-slate-400" />
                     <span>{user.username}</span>
@@ -81,7 +87,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               )}
             </div>
 
-            {/* Mobile menu button */}
+            {}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -93,7 +99,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div 
@@ -133,6 +139,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     >
                       My Profile
                     </Link>
+                    {user.is_admin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block px-4 py-3 rounded-xl text-base font-bold ${isActive('/admin') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
                     <div className="pt-4 mt-4 border-t border-slate-100">
                       <button
                         onClick={handleLogout}
@@ -201,3 +216,4 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export default Layout;
+Layout;

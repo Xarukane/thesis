@@ -19,7 +19,7 @@ const DeleteListingButton: React.FC<DeleteListingButtonProps> = ({ listingId, on
       await api.delete(`/listings/${listingId}`);
     },
     onSuccess: () => {
-      // Invalidate all listing-related queries to ensure UI is fresh everywhere
+      
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       queryClient.invalidateQueries({ queryKey: ['user-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listing', listingId] });

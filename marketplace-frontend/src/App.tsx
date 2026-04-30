@@ -11,6 +11,7 @@ import EditListingPage from './pages/EditListingPage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import ChatPage from './pages/ChatPage';
+import AdminPage from './pages/AdminPage';
 
 const queryClient = new QueryClient();
 
@@ -27,11 +28,10 @@ const App: React.FC = () => {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
               <Route path="/create-listing" element={<CreateListingPage />} />
-...
-
               <Route path="/edit-listing/:id" element={<EditListingPage />} />
               <Route path="/listings/:id" element={<ListingDetailPage />} />
               <Route path="/chat" element={<ChatPage />} />
+              <Route path="/admin" element={<AdminPage />} />
             </Routes>
           </Layout>
         </Router>

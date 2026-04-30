@@ -61,7 +61,7 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
         />
         
-        {/* Badges */}
+        {}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {isOwner && (
             <div className="bg-indigo-600 text-white px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-[0.15em] shadow-xl flex items-center backdrop-blur-md">
@@ -79,7 +79,7 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
           ${listing.price.toLocaleString()}
         </div>
         
-        {/* Admin/Owner Overlay Actions */}
+        {}
         {canModify && (
           <div 
             className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0"

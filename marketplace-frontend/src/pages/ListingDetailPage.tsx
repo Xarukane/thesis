@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   MapPin, Tag, MessageCircle, User as UserIcon, 
   ArrowLeft, ShieldCheck, Edit2, Share2, Heart,
-  ExternalLink, Clock, X
+  Clock, X
 } from 'lucide-react';
 import DeleteListingButton from '../components/DeleteListingButton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,7 +103,7 @@ const ListingDetailPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Left Column: Images & Description */}
+        {}
         <div className="lg:col-span-2 space-y-10">
           <div className="card !rounded-[2.5rem] !shadow-2xl !shadow-indigo-50 border-none relative group">
             <div className="relative h-[400px] md:h-[600px] bg-slate-50">
@@ -149,7 +149,7 @@ const ListingDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Sticky Sidebar */}
+        {}
         <div className="space-y-8">
           <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-indigo-100/20 border border-slate-200/60 sticky top-28">
             <div className="flex items-center justify-between mb-6">
@@ -193,7 +193,7 @@ const ListingDetailPage: React.FC = () => {
               )}
             </div>
 
-            {/* Seller Profile Card Integration */}
+            {}
             <div className="mt-10 pt-10 border-t border-slate-100">
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Seller Details</h3>
               <div className="flex items-center group">
@@ -215,7 +215,7 @@ const ListingDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Admin/Owner Actions */}
+            {}
             {canModify && (
               <div className="mt-10 bg-slate-900 p-6 rounded-[2rem] text-white shadow-2xl shadow-slate-900/20">
                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 text-center">Manage Your Listing</h3>
