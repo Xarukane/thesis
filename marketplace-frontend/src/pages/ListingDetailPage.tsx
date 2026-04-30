@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import api from '../api/axios';
+import api, { STATIC_URL } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { 
   MapPin, Tag, MessageCircle, User as UserIcon, 
@@ -72,7 +72,7 @@ const ListingDetailPage: React.FC = () => {
   const canModify = isOwner || isAdmin;
 
   const images = listing.images.length > 0 
-    ? listing.images.map((img: any) => `http://localhost:8000/static/images/${img.filename}`)
+    ? listing.images.map((img: any) => `${STATIC_URL}/images/${img.filename}`)
     : ['https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2070&auto=format&fit=crop'];
 
   return (

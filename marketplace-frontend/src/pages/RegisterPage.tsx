@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:8000/api/users/register', formData);
+      await api.post('/users/register', formData);
       navigate('/login');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed. Try a different username or email.');

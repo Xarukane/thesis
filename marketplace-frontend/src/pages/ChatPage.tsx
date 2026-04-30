@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import api, { API_BASE_URL } from '../api/axios';
 import { Send, User as UserIcon, MessageCircle, ArrowLeft, MoreVertical, Search, Zap, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -67,8 +67,15 @@ const ChatPage: React.FC = () => {
     if (authLoading || !user) return;
 
     const token = localStorage.getItem('token');
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//localhost:8000/api/chat/ws?token=${token}`;
+    
+    // Construct WebSocket URL based on API_BASE_URL
+    let wsUrl;
+    if (API_BASE_URL.startsWith('http')) {
+      wsUrl = API_BASE_URL.replace(/^http/, 'ws') + `/chat/ws?token=${token}`;
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${protocol}//${window.location.host}/api/chat/ws?token=${token}`;
+    }
     
     const socket = new WebSocket(wsUrl);
 

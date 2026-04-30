@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../api/axios';
+import api, { STATIC_URL } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { Save, CheckCircle, ArrowLeft, Trash2, Camera, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -282,7 +282,7 @@ const EditListingPage: React.FC = () => {
                       className="relative group rounded-2xl overflow-hidden aspect-video bg-slate-50 border border-slate-100 shadow-sm"
                     >
                       <img 
-                        src={`http://localhost:8000/static/images/${img.filename}`} 
+                        src={`${STATIC_URL}/images/${img.filename}`} 
                         alt="Listing" 
                         className="w-full h-full object-cover"
                       />

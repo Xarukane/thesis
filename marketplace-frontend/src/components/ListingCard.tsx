@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DeleteListingButton from './DeleteListingButton';
 import { motion } from 'framer-motion';
+import { STATIC_URL } from '../api/axios';
 
 interface Image {
   id: number;
@@ -30,7 +31,7 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const imageUrl = listing.images.length > 0 
-    ? `http://localhost:8000/static/images/${listing.images[0].filename}`
+    ? `${STATIC_URL}/images/${listing.images[0].filename}`
     : 'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2070&auto=format&fit=crop';
 
   const isOwner = user?.id === listing.owner.id;

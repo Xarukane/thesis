@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../api/axios';
+import api, { STATIC_URL } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
 import { User as UserIcon, Calendar, Package, ShieldCheck, ExternalLink, Camera, Loader2 } from 'lucide-react';
@@ -85,7 +85,7 @@ const ProfilePage: React.FC = () => {
   );
 
   const userImageUrl = (user && user.profile_image) 
-    ? `http://localhost:8000/static/images/${user.profile_image}` 
+    ? `${STATIC_URL}/images/${user.profile_image}` 
     : null;
 
   return (
