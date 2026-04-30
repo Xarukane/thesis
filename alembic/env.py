@@ -10,6 +10,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from app.core.config import settings
+
 
 
                                                    
@@ -17,6 +19,8 @@ from alembic import context
                                                    
 
 config = context.config
+
+config.set_main_option("sqlalchemy.url", settings.sqlalchemy_database_url)
 
 
 

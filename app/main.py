@@ -42,21 +42,11 @@ app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
                                                                          
 
-origins = [
-
-    "http://localhost:3000",                                       
-
-    "http://localhost:5173",                           
-
-]
-
-
-
 app.add_middleware(
 
     CORSMiddleware,
 
-    allow_origins=origins,
+    allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
 
     allow_credentials=True,
 
