@@ -1,65 +1,120 @@
-# Marketplace Fullstack Prototype
+# Secure and Scalable Multi-Vendor Marketplace Platform
 
-A professional marketplace application built with **FastAPI** (Python) and **React** (TypeScript).
-
-## Features
-- **Authentication**: JWT-based login/register with secure password hashing.
-- **Listings**: Create, Read, Update, and Delete listings with image uploads.
-- **Search & Filtering**: Filter by category, location, price range, and keywords.
-- **Real-time Chat**: Instant messaging between buyers and sellers via WebSockets.
-- **User Profiles**: Manage your own listings and view public profiles of other sellers.
-- **Modern UI/UX**: Responsive design with Framer Motion animations and Toast notifications.
+A professional, full-stack marketplace application designed for high-performance peer-to-peer commerce. This platform bridges the gap between sophisticated backend engineering and an intuitive, modern frontend, providing a seamless ecosystem for users to list, discover, and trade goods securely.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Key Features
+
+### 🛒 Multi-Vendor Marketplace
+- **Listing Management**: Full CRUD (Create, Read, Update, Delete) operations for product listings.
+- **Image Handling**: Multi-image upload support with UUID-based storage and real-time previews.
+- **Advanced Discovery**: Robust filtering system by category, location, price range, and keyword search.
+
+### 💬 Communication & Security
+- **Real-time Chat**: Instant bidirectional messaging powered by WebSockets for seamless negotiations.
+- **Stateless Authentication**: Secure JWT-based login and registration with bcrypt password hashing.
+- **User Profiles**: Personalized dashboards to manage listings, avatars, and account details.
+
+### 🛡 Moderation & Control
+- **Admin Panel**: Elevated privileges for managing all users and moderating platform listings.
+- **Responsive Design**: Mobile-first UI built with TailwindCSS and Framer Motion animations.
+
+---
+
+## 🛠 Tech Stack
+
+### Backend
+- **FastAPI**: Asynchronous Python web framework for high-concurrency API performance.
+- **SQLAlchemy & Alembic**: Advanced ORM and version-controlled database migrations.
+- **PostgreSQL**: Production-grade relational database for persistent storage.
+- **Pydantic V2**: Strict data validation and settings management.
+
+### Frontend
+- **React (TypeScript)**: Component-based architecture for a reactive user interface.
+- **Vite**: Next-generation frontend tooling for optimized builds.
+- **TanStack Query**: Efficient server-state management and caching.
+- **TailwindCSS**: Utility-first CSS framework for modern, responsive styling.
+
+---
+
+## 📦 Getting Started
 
 ### 1. Prerequisites
-- Python 3.10+
-- Node.js (v18+) & npm
+- **Python 3.10+**
+- **Node.js (v18+) & npm**
 
-### 2. Backend Setup
+### 2. Backend Installation
 ```bash
 # Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Setup environment variables
+# Environment Setup
 cp .env.example .env
-# (Optional) Edit .env to change your SECRET_KEY
+# Edit .env to configure your SECRET_KEY and DATABASE_URL
 
-# Run database migrations
+# Database Setup
 alembic upgrade head
 
-# Start the server
+# Start Server
 uvicorn app.main:app --reload
 ```
-The backend will be running at `http://localhost:8000`.
+API Docs: `http://localhost:8000/docs`
 
-### 3. Frontend Setup
+### 3. Frontend Installation
 ```bash
 cd marketplace-frontend
 
 # Install dependencies
 npm install
 
-# Start the development server
+# Start Development Server
 npm run dev
 ```
-The frontend will be running at `http://localhost:5173`.
+Local URL: `http://localhost:5173`
 
 ---
 
-## 🛠 Tech Stack
-- **Backend**: FastAPI, SQLAlchemy 2.0, Alembic, Pydantic V2, PyJWT, bcrypt.
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS, TanStack Query (React Query), Framer Motion, Lucide Icons.
-- **Database**: SQLite (Development).
+## 🧪 Testing Guide
+
+The project maintains high reliability through a multi-layered testing strategy.
+
+### 1. Backend Tests (Pytest)
+Located in the `tests/` directory. These tests verify API endpoints, authentication logic, and database interactions.
+```bash
+# From project root
+pytest tests/
+```
+
+### 2. Frontend Tests (Vitest)
+Located alongside components. These tests verify UI rendering and user interactions.
+```bash
+cd marketplace-frontend
+npm run test
+```
+
+### 3. Manual Testing Scenarios
+Detailed manual testing protocols for Auth, Listings, Chat, and Admin features can be found in:
+`documentation/structured_v2/06_Testing_Scenarios.txt`
+
+---
 
 ## 📁 Project Structure
-- `/app`: FastAPI backend source code.
+- `/app`: FastAPI source code (models, schemas, endpoints).
 - `/alembic`: Database migration scripts.
-- `/marketplace-frontend`: React frontend source code.
-- `/uploads`: Local storage for uploaded images.
+- `/marketplace-frontend`: React source code (components, pages, context).
+- `/documentation/structured_v2`: Comprehensive academic and user documentation.
+- `/uploads`: Local storage for product images.
+
+---
+
+## 📄 Extended Documentation
+For a deep dive into the architecture and usage, refer to the following files in `documentation/structured_v2/`:
+- `01_Introduction.txt`: Motivation and Problem Statement.
+- `02_User_Documentation.txt`: Installation Guide and User Manual.
+- `03_Developer_Documentation.txt`: System Architecture and Module Implementation.
+- `04_Summary.txt`: Project Reflective Summary.
